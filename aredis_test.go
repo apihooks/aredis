@@ -14,6 +14,7 @@ var (
 
 	name    = "aredis"
 	version = "0.1"
+	origin  = "origin"
 )
 
 func init() {
