@@ -21,6 +21,7 @@ type Client struct {
 	// Seperator is a string that seperates Name, Version and the key.
 	Seperator string
 
+	// pool of redigo Redis connections.
 	pool *redis.Pool
 }
 
@@ -62,23 +63,33 @@ func (c *Client) Do(cmd, key string, rest ...interface{}) (interface{}, error) {
 	return conn.Do(cmd, prefix...)
 }
 
+// WithOrigin prefixes origin to key to indicate key belongs to that origin.
+func (c *Client) WithOrigin(origin, key string) string {
+	return strings.Join([]string{origin, key}, SeperatorKey)
+}
+
 // Prefix adds Name and Version prefixes to key.
 func (c *Client) Prefix(key string) string {
 	return strings.Join([]string{c.Name, c.Version, key}, SeperatorKey)
 }
 
-// GetPool returns the redigo redis connection pool.
+// GetPool returns the redigo Redis connection pool.
 func (c *Client) GetPool() *redis.Pool {
 	return c.pool
 }
 
-// GetConn returns a single redigo redis connection. It's upto the caller to
+// GetConn returns a single redigo Redis connection. It's upto the caller to
 // close the connection when done with it.
 func (c *Client) GetConn() redis.Conn {
 	return c.pool.Get()
 }
 
-// Close closes redis connections.
+// Close closes Redis connections.
 func (c *Client) Close() error {
 	return c.pool.Close()
+}
+
+// IsErrNil returns true if err is key doesn't exist in Redis.
+func (c *Client) IsErrNil(err error) bool {
+	return err != nil && err == redis.ErrNil
 }
