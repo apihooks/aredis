@@ -1,4 +1,4 @@
-# Aredis
+# Aredis [![Build Status](https://api.travis-ci.org/apihooks/aredis.svg?branch=master)](https://travis-ci.org/apihooks/aredis)
 
 Aredis is a wrapper around https://github.com/garyburd/redigo for apihook apis.
 

@@ -1,0 +1,10 @@
+language: go
+
+services:
+  - redis-server
+
+go:
+  - 1.5
+  - 1.4
+  - 1.3
+  - tip
