@@ -12,6 +12,24 @@ var (
 	SeperatorKey = ":"
 )
 
+type Config struct {
+	Name        string
+	Version     string
+	MaxIdle     int
+	MaxActive   int
+	IdleTimeout time.Duration
+}
+
+func NewDefaultConfig(name, version string) *Config {
+	return &Config{
+		Name:        name,
+		Version:     version,
+		MaxIdle:     3,
+		MaxActive:   0, // unlimited
+		IdleTimeout: 240 * time.Second,
+	}
+}
+
 type Client struct {
 	// Name is the identifier of worker using this library. This is used to
 	// prefix keys along with Version in Redis.
@@ -26,10 +44,10 @@ type Client struct {
 }
 
 // New initializeds new Client along with Redis connection pool.
-func New(url, name, version string) (*Client, error) {
+func New(url string, c *Config) (*Client, error) {
 	pool := &redis.Pool{
-		MaxIdle:     3,
-		IdleTimeout: 240 * time.Second,
+		MaxIdle:     c.MaxIdle, // no. of idle conns in pool
+		IdleTimeout: c.IdleTimeout,
 		Dial:        func() (redis.Conn, error) { return redis.Dial("tcp", url) },
 		TestOnBorrow: func(c redis.Conn, t time.Time) error {
 			_, err := c.Do("PING")
@@ -46,13 +64,20 @@ func New(url, name, version string) (*Client, error) {
 	}
 
 	client := &Client{
-		Name: name, Version: version, Seperator: SeperatorKey, pool: pool,
+		Name:      c.Name,
+		Version:   c.Version,
+		Seperator: SeperatorKey,
+		pool:      pool,
 	}
 
 	return client, nil
 }
 
-// Do is the primary method for interacting with Redis. It prefixes all keys.
+// Do is the primary method for interacting with Redis. It runs the given cmd
+// in a redis conn from the pool and closes it when done.
+//
+// It also prefixes all keys with name and version passed in Config when
+// initializing.
 func (c *Client) Do(cmd, key string, rest ...interface{}) (interface{}, error) {
 	conn := c.GetConn()
 	defer conn.Close()
@@ -68,7 +93,8 @@ func (c *Client) WithOrigin(origin, key string) string {
 	return strings.Join([]string{origin, key}, SeperatorKey)
 }
 
-// Prefix adds Name and Version prefixes to key.
+// Prefix prefixes given key with name and version passed in Config when
+// initializing.
 func (c *Client) Prefix(key string) string {
 	return strings.Join([]string{c.Name, c.Version, key}, SeperatorKey)
 }
@@ -78,13 +104,13 @@ func (c *Client) GetPool() *redis.Pool {
 	return c.pool
 }
 
-// GetConn returns a single redigo Redis connection. It's upto the caller to
-// close the connection when done with it.
+// GetConn returns a single redigo Redis connection. Be sure to close the
+// connection when finished.
 func (c *Client) GetConn() redis.Conn {
 	return c.pool.Get()
 }
 
-// Close closes Redis connections.
+// Close closes Redis connection.
 func (c *Client) Close() error {
 	return c.pool.Close()
 }

@@ -13,7 +13,7 @@ var (
 
 func TestObject(t *testing.T) {
 	Convey("Object", t, func() {
-		c, err := New(redisUrl, name, version)
+		c, err := New(redisUrl, NewDefaultConfig(name, version))
 		So(err, ShouldBeNil)
 
 		Convey("It shouldn't overwrite if object doesn't exist", func() {

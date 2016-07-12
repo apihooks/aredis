@@ -30,7 +30,7 @@ func TestNew(t *testing.T) {
 		l, _ := net.Listen("tcp", ":0")
 		l.Close()
 
-		_, err := New(l.Addr().String(), name, version)
+		_, err := New(l.Addr().String(), NewDefaultConfig(name, version))
 		So(err, ShouldNotBeNil)
 	})
 }
