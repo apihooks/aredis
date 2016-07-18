@@ -1,6 +1,17 @@
 {
 	"comment": "",
 	"ignore": "test",
-	"package": [],
+	"package": [
+		{
+			"path": "context",
+			"revision": ""
+		},
+		{
+			"checksumSHA1": "9jjO5GjLa0XF/nfWihF02RoH4qc=",
+			"path": "golang.org/x/net/context",
+			"revision": "3797cd8864994d713d909eda5e61ede8683fdc12",
+			"revisionTime": "2016-07-16T23:29:31Z"
+		}
+	],
 	"rootPath": "github.com/apihooks/aredis"
 }
