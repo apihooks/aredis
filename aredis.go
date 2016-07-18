@@ -8,18 +8,31 @@ import (
 )
 
 var (
-	SettingsKey  = "settings"
-	SeperatorKey = ":"
+	seperatorKey = ":"
+	settingsKey  = "settings"
 )
 
+// Config is the user definable options.
 type Config struct {
-	Name        string
-	Version     string
-	MaxIdle     int
-	MaxActive   int
+	// Name is identifier of app using this library. This is used as prefix in
+	// keys.
+	Name string
+
+	// Version is version of app using this library. This is used as prefix in
+	// keys.
+	Version string
+
+	// MaxIdle is redigo/redis setting.
+	MaxIdle int
+
+	// MaxActive is redigo/redis setting.
+	MaxActive int
+
+	// IdleTimeout is redigo/redis setting.
 	IdleTimeout time.Duration
 }
 
+// NewDefaultConfig returns *Config with sane defaults for redigo/redis.
 func NewDefaultConfig(name, version string) *Config {
 	return &Config{
 		Name:        name,
@@ -30,6 +43,7 @@ func NewDefaultConfig(name, version string) *Config {
 	}
 }
 
+// Client is a client for this library. Use New() to initalize it.
 type Client struct {
 	// Name is the identifier of worker using this library. This is used to
 	// prefix keys along with Version in Redis.
@@ -66,7 +80,7 @@ func New(url string, c *Config) (*Client, error) {
 	client := &Client{
 		Name:      c.Name,
 		Version:   c.Version,
-		Seperator: SeperatorKey,
+		Seperator: seperatorKey,
 		pool:      pool,
 	}
 
@@ -90,13 +104,13 @@ func (c *Client) Do(cmd, key string, rest ...interface{}) (interface{}, error) {
 
 // WithOrigin prefixes origin to key to indicate key belongs to that origin.
 func (c *Client) WithOrigin(origin, key string) string {
-	return strings.Join([]string{origin, key}, SeperatorKey)
+	return strings.Join([]string{origin, key}, seperatorKey)
 }
 
 // Prefix prefixes given key with name and version passed in Config when
 // initializing.
 func (c *Client) Prefix(key string) string {
-	return strings.Join([]string{c.Name, c.Version, key}, SeperatorKey)
+	return strings.Join([]string{c.Name, c.Version, key}, seperatorKey)
 }
 
 // GetPool returns the redigo Redis connection pool.

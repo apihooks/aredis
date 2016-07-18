@@ -9,13 +9,13 @@ import (
 // GetSettings gets settings for origin.
 // key: <worker>:<version>:<origin>:settings
 func (c *Client) GetSettings(origin string, s interface{}) error {
-	return c.GetObject(origin, SettingsKey, &s)
+	return c.GetObject(origin, settingsKey, &s)
 }
 
 // SaveSettings saves given settings for origin.
 // key: <worker>:<version>:<origin>:settings
 func (c *Client) SaveSettings(origin string, s interface{}) error {
-	return c.SaveObject(origin, SettingsKey, &s)
+	return c.SaveObject(origin, settingsKey, &s)
 }
 
 // GetObject gets marshalled object for origin and key.
